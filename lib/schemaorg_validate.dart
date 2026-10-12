@@ -25,6 +25,7 @@ export 'src/rich_results/google_recipe_profile.dart';
 export 'src/rich_results/profile_interface.dart';
 export 'src/rich_results/profile_registry.dart';
 
+export 'src/validator/levenshtein.dart';
 export 'src/validator/validator.dart';
 
 export 'src/vocabulary/vocabulary.dart';
