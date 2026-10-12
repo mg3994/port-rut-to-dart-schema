@@ -78,11 +78,11 @@ Map<String, dynamic> buildRule(DiagnosticCode code) {
     DiagnosticCode.eligibilityRestricted => ('EligibilityRestricted', 'Rich result eligibility restricted', 'note'),
   };
 
-  return {
+  return <String, dynamic>{
     'id': id,
     'name': name,
-    'shortDescription': {'text': desc},
-    'defaultConfiguration': {'level': level},
+    'shortDescription': <String, dynamic>{'text': desc},
+    'defaultConfiguration': <String, dynamic>{'level': level},
   };
 }
 
@@ -90,33 +90,35 @@ Map<String, dynamic> diagnosticToResult(
   ValidationDiagnostic diag,
   String sourceUri,
 ) {
-  final location = <String, dynamic>{
-    'physicalLocation': {
-      'artifactLocation': {'uri': sourceUri},
-    },
+  final physicalLocation = <String, dynamic>{
+    'artifactLocation': <String, dynamic>{'uri': sourceUri},
   };
 
   if (diag.sourceLocation != null) {
-    (location['physicalLocation'] as Map<String, dynamic>)['region'] = {
+    physicalLocation['region'] = <String, dynamic>{
       'startLine': diag.sourceLocation!.line,
       'startColumn': diag.sourceLocation!.column,
     };
   }
 
+  final location = <String, dynamic>{
+    'physicalLocation': physicalLocation,
+  };
+
   if (diag.path.isNotEmpty) {
     location['logicalLocations'] = <Map<String, dynamic>>[
-      {
+      <String, dynamic>{
         'fullyQualifiedName': diag.path,
         'kind': 'object',
       }
     ];
   }
 
-  return {
+  return <String, dynamic>{
     'ruleId': ruleId(diag.code),
     'level': sarifLevel(diag.severity),
-    'message': {'text': diag.message},
-    'locations': [location],
+    'message': <String, dynamic>{'text': diag.message},
+    'locations': <dynamic>[location],
   };
 }
 
@@ -146,13 +148,13 @@ Map<String, dynamic> buildSarif(
     }
   }
 
-  return {
+  return <String, dynamic>{
     '\$schema': sarifSchema,
     'version': '2.1.0',
-    'runs': [
-      {
-        'tool': {
-          'driver': {
+    'runs': <dynamic>[
+      <String, dynamic>{
+        'tool': <String, dynamic>{
+          'driver': <String, dynamic>{
             'name': 'schemaorg-validate',
             'version': version,
             'informationUri': 'https://github.com/mitrovicsinisaa/schemaorg-rs',
@@ -160,8 +162,8 @@ Map<String, dynamic> buildSarif(
           },
         },
         'results': results,
-        'invocations': [
-          {
+        'invocations': <dynamic>[
+          <String, dynamic>{
             'executionSuccessful': true,
             'toolConfigurationNotifications': <dynamic>[],
           }
