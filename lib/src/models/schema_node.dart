@@ -1,0 +1,75 @@
+import 'source_format.dart';
+import 'source_location.dart';
+import 'schema_value.dart';
+
+/// A single structured data node (e.g. a Product, an Offer).
+class SchemaNode {
+  /// Schema.org type(s), e.g. ["Product", "IndividualProduct"].
+  final List<String> types;
+
+  /// Properties: key -> list of values (insertion-ordered).
+  final Map<String, List<SchemaValue>> properties;
+
+  /// Source format that this node was extracted from.
+  final SourceFormat sourceFormat;
+
+  /// Location in the original HTML document.
+  final SourceLocation? sourceLocation;
+
+  SchemaNode({
+    required this.types,
+    required this.properties,
+    required this.sourceFormat,
+    this.sourceLocation,
+  });
+
+  /// Returns the `@id` of this node, if present.
+  String? get id {
+    final vals = properties['@id'];
+    if (vals == null || vals.isEmpty) return null;
+    final first = vals.first;
+    if (first is SchemaValueText) return first.value;
+    if (first is SchemaValueUrl) return first.value;
+    return null;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SchemaNode) return false;
+    if (types.length != other.types.length) return false;
+    for (var i = 0; i < types.length; i++) {
+      if (types[i] != other.types[i]) return false;
+    }
+    if (sourceFormat != other.sourceFormat) return false;
+    if (sourceLocation != other.sourceLocation) return false;
+    if (properties.length != other.properties.length) return false;
+    for (final entry in properties.entries) {
+      final otherVals = other.properties[entry.key];
+      if (otherVals == null || otherVals.length != entry.value.length) {
+        return false;
+      }
+      for (var i = 0; i < entry.value.length; i++) {
+        if (entry.value[i] != otherVals[i]) return false;
+      }
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      Object.hashAll(types),
+      sourceFormat,
+      sourceLocation,
+      Object.hashAll(
+        properties.entries.map((e) => Object.hash(e.key, Object.hashAll(e.value))),
+      ),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'SchemaNode(types: $types, properties: ${properties.keys.toList()}, sourceFormat: $sourceFormat)';
+  }
+}
