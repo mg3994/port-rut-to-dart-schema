@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:schemaorg_validate/schemaorg_validate.dart';
 
-void main() {
+void main() async {
   const html = '''
 <html>
   <head>
@@ -62,4 +62,26 @@ void main() {
     'example.html',
   );
   print(const JsonEncoder.withIndent('  ').convert(sarif));
+
+  print('\n=== 5. Generating & Validating JSON Schemas (via json_schema_builder) ===');
+  // Generate JSON Schema for extracted nodes
+  if (graph.nodes.isNotEmpty) {
+    final firstNode = graph.nodes.first;
+    final jsonSchema = firstNode.toJsonSchema();
+    print('Generated Node JSON Schema:');
+    print(jsonSchema.toJson(indent: '  '));
+
+    // Validate a raw JSON map against the generated schema
+    final sampleJson = firstNode.toJson();
+    final schemaErrors = firstNode.validateJson(sampleJson);
+    if (schemaErrors.isEmpty) {
+      print('✅ Raw JSON successfully validated against json_schema_builder Schema!');
+    } else {
+      print('❌ Validation failed with ${schemaErrors.length} error(s)');
+    }
+  }
+
+  // Generate a standalone vocabulary JSON Schema for Genkit prompts
+  final productSchema = SchemaOrgJsonSchemaBuilder.schemaTypeToJsonSchema('Product');
+  print('Vocabulary Product Schema Title: ${productSchema.title}');
 }
