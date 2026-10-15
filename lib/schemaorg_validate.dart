@@ -8,6 +8,8 @@ export 'src/models/schema_value.dart';
 export 'src/models/source_format.dart';
 export 'src/models/source_location.dart';
 
+export 'src/json_schema/json_schema_builder_utils.dart';
+
 export 'src/parser/common.dart';
 export 'src/parser/html_extractor.dart';
 export 'src/parser/jsonld_parser.dart' hide maxDepth, maxRefDepth, maxRefResolutions;
