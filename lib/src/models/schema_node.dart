@@ -33,6 +33,67 @@ class SchemaNode {
     return null;
   }
 
+  /// Converts this [SchemaNode] to a standard JSON-compatible Map.
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (types.isNotEmpty) {
+      map['@type'] = types.length == 1 ? types.first : List<String>.from(types);
+    }
+    for (final entry in properties.entries) {
+      final key = entry.key;
+      final vals = entry.value;
+      if (vals.isEmpty) continue;
+      if (vals.length == 1) {
+        map[key] = vals.first.toJson();
+      } else {
+        map[key] = vals.map((v) => v.toJson()).toList();
+      }
+    }
+    return map;
+  }
+
+  /// Deserializes a JSON map into a [SchemaNode].
+  factory SchemaNode.fromJson(
+    Map<String, dynamic> json, {
+    SourceFormat sourceFormat = SourceFormat.jsonLd,
+    SourceLocation? sourceLocation,
+  }) {
+    final types = <String>[];
+    final rawType = json['@type'] ?? json['type'];
+    if (rawType is String) {
+      types.add(rawType);
+    } else if (rawType is List) {
+      types.addAll(rawType.map((e) => e.toString()));
+    }
+
+    final properties = <String, List<SchemaValue>>{};
+    for (final entry in json.entries) {
+      final key = entry.key;
+      if (key == '@type' || key == 'type') continue;
+      final val = entry.value;
+      if (val == null) continue;
+
+      final valuesList = <SchemaValue>[];
+      if (val is List) {
+        for (final item in val) {
+          if (item != null) {
+            valuesList.add(SchemaValue.fromJson(item));
+          }
+        }
+      } else {
+        valuesList.add(SchemaValue.fromJson(val));
+      }
+      properties[key] = valuesList;
+    }
+
+    return SchemaNode(
+      types: types,
+      properties: properties,
+      sourceFormat: sourceFormat,
+      sourceLocation: sourceLocation,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

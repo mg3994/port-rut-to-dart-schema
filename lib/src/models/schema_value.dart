@@ -3,6 +3,39 @@ import 'schema_node.dart';
 /// A value within a structured data node.
 sealed class SchemaValue {
   const SchemaValue();
+
+  /// Converts this [SchemaValue] into a JSON-compatible Dart primitive/map value.
+  dynamic toJson() {
+    return switch (this) {
+      SchemaValueText(:final value) => value,
+      SchemaValueUrl(:final value) => value,
+      SchemaValueNode(:final node) => node.toJson(),
+      SchemaValueBoolean(:final value) => value,
+      SchemaValueNumber(:final value) => value,
+      SchemaValueDateTime(:final value) => value,
+    };
+  }
+
+  /// Deserializes a JSON value into a [SchemaValue].
+  static SchemaValue fromJson(dynamic value) {
+    if (value is bool) return SchemaValueBoolean(value);
+    if (value is num) return SchemaValueNumber(value);
+    if (value is Map<String, dynamic>) {
+      return SchemaValueNode(SchemaNode.fromJson(value));
+    }
+    if (value is Map) {
+      return SchemaValueNode(
+        SchemaNode.fromJson(Map<String, dynamic>.from(value)),
+      );
+    }
+    if (value is String) {
+      if (value.startsWith('http://') || value.startsWith('https://')) {
+        return SchemaValueUrl(value);
+      }
+      return SchemaValueText(value);
+    }
+    return SchemaValueText(value.toString());
+  }
 }
 
 /// Plain text content.
